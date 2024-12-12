@@ -2,7 +2,7 @@ const { Client, GatewayIntentBits } = require('discord.js');
 const net = require('net');
 
 // Token del bot Discord
-const DISCORD_TOKEN = 'MTMxNjUyMzg0NDY2MzY0NDIyMg.GlxTU0.x9fDoia9EK7XRtAMx8DkBjC4__4dWnIAdrGzHo';
+const DISCORD_TOKEN = 'MTMxNjUyMzg0NDY2MzY0NDIyMg.GHs9hK.9QrTWgMJNFTwkQ-B0ySnz_ZD1DFiXDasChpR2A';
 const ROBLOX_SERVER_IP = '127.0.0.1'; // Indirizzo del server Roblox
 const ROBLOX_SERVER_PORT = 3001;    // Porta per la comunicazione con Roblox
 
