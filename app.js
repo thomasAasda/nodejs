@@ -1,57 +1,69 @@
-const express = require('express');
-const cors = require('cors');
-const child_process = require('child_process'); // Per eseguire comandi di sistema
-const app = express();
-const port = 3000;
+const { Client, GatewayIntentBits } = require('discord.js');
+const net = require('net');
 
-app.use(express.json());
-app.use(cors());
+// Token del bot Discord
+const DISCORD_TOKEN = 'MTMxNjUyMzg0NDY2MzY0NDIyMg.GlxTU0.x9fDoia9EK7XRtAMx8DkBjC4__4dWnIAdrGzHo';
+const ROBLOX_SERVER_IP = '127.0.0.1'; // Indirizzo del server Roblox
+const ROBLOX_SERVER_PORT = 3001;    // Porta per la comunicazione con Roblox
 
-// Endpoint per eseguire comandi (flessibile, ma sicuro)
-app.post('/execute', (req, res) => {
-  const { command } = req.body;
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 
-  if (!command) {
-    return res.status(400).send({ error: "Comando mancante!" });
-  }
+let gameSessionActive = false; // Flag per tracciare lo stato della sessione di gioco
 
-  // Logga il comando ricevuto per monitoraggio
-  console.log(`Comando ricevuto: ${command}`);
+// Funzione per inviare un comando al server Roblox tramite socket
+async function sendCommandToRoblox(command) {
+    return new Promise((resolve, reject) => {
+        const socket = new net.Socket();
 
-  // Controllo basilare per evitare comandi pericolosi
-  if (command.toLowerCase().includes("rm") || command.toLowerCase().includes("shutdown") || command.toLowerCase().includes("reboot")) {
-    return res.status(400).send({ error: "Comando pericoloso bloccato!" });
-  }
+        socket.connect(ROBLOX_SERVER_PORT, ROBLOX_SERVER_IP, () => {
+            socket.write(command, 'utf-8', () => {
+                socket.end();
+                resolve();
+            });
+        });
 
-  // Esegui il comando in modo sicuro
-  try {
-    const result = child_process.execSync(command, { encoding: 'utf-8' }); // Esegui il comando in modo sincrono
-    console.log('Comando eseguito con successo');
-    res.status(200).send({ message: 'Comando eseguito con successo', result });
-  } catch (error) {
-    console.error('Errore nell\'esecuzione del comando:', error);
-    res.status(500).send({ error: 'Errore nell\'esecuzione del comando', details: error.message });
-  }
+        socket.on('error', (err) => {
+            console.error(`Errore nella connessione con Roblox: ${err.message}`);
+            reject(err);
+        });
+    });
+}
+
+client.once('ready', () => {
+    console.log(`Bot connesso come ${client.user.tag}`);
 });
 
-// Endpoint per ottenere l'ultimo comando eseguito (per debug o monitoraggio)
-let lastCommand = null;
+client.on('messageCreate', async (message) => {
+    // Ignora i messaggi inviati dal bot stesso
+    if (message.author.bot) return;
 
-app.post('/setLastCommand', (req, res) => {
-  const { command } = req.body;
-  lastCommand = command;
-  res.status(200).send({ message: 'Comando impostato con successo' });
+    // Comando per iniziare la sessione
+    if (message.content === '/start') {
+        if (!gameSessionActive) {
+            gameSessionActive = true;
+            await message.channel.send('Sessione di gioco avviata! I prossimi comandi saranno inviati al gioco.');
+        } else {
+            await message.channel.send('La sessione di gioco è già attiva.');
+        }
+        return;
+    }
+
+    // Comandi da inviare al gioco se la sessione è attiva
+    if (gameSessionActive) {
+        try {
+            await sendCommandToRoblox(message.content);
+            await message.channel.send(`Comando inviato al gioco: ${message.content}`);
+        } catch (err) {
+            await message.channel.send(`Errore nell'invio del comando al gioco: ${err.message}`);
+        }
+        return;
+    }
+
+    // Notifica se la sessione non è attiva
+    if (message.content.startsWith('/')) {
+        await message.channel.send('Sessione di gioco non attiva. Usa /start per iniziare.');
+    }
 });
 
-app.get('/getLastCommand', (req, res) => {
-  if (lastCommand) {
-    res.status(200).send({ lastCommand });
-  } else {
-    res.status(404).send({ message: 'Nessun comando eseguito ancora' });
-  }
-});
-
-// Avvia il server
-app.listen(port, () => {
-  console.log(`Server in ascolto su http://localhost:${port}`);
-});
+// Avvia il bot
+client.login(DISCORD_TOKEN);
