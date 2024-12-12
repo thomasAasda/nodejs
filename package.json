@@ -8,6 +8,8 @@
   "dependencies": {
     "express": "^4.19.2",
     "cors": "^2.8.5"
+    "discord.js": "^14.11.0"  // Versione più recente al momento
+}
   },
   "scripts": {
     "start": "node app.js"
