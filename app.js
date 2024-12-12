@@ -1,8 +1,11 @@
 const express = require("express");
+const cors = require("cors");
 const app = express();
 const port = 3000;
 
-// Middleware per parsing JSON
+// Aggiungi questa linea per abilitare CORS per tutte le origini
+app.use(cors()); // Abilita CORS per tutte le richieste
+
 app.use(express.json());
 
 // Variabile per salvare l'ultimo comando ricevuto
@@ -16,17 +19,16 @@ app.post("/execute", (req, res) => {
     return res.status(400).send({ error: "Comando mancante!" });
   }
 
-  lastCommand = command; // Salva il comando
+  lastCommand = command;
   console.log(`Comando ricevuto: ${command}`);
 
-  // Qui puoi aggiungere la logica per inviare il comando al gioco Roblox
-  // Potresti voler usare un WebSocket o un altro meccanismo per comunicare con il gioco
+  // Aggiungi la logica per eseguire il comando, ad esempio un'API che comunichi con Roblox
 
   res.status(200).send({ message: "Comando ricevuto con successo!" });
 });
 
-// Endpoint GET per restituire l'ultimo comando (per Roblox)
-app.get("/", (req, res) => {
+// Endpoint GET per ottenere l'ultimo comando
+app.get("/command", (req, res) => {
   if (lastCommand) {
     res.status(200).send({ command: lastCommand });
     lastCommand = null; // Resetta il comando dopo averlo inviato
@@ -35,7 +37,6 @@ app.get("/", (req, res) => {
   }
 });
 
-// Avvia il server
 app.listen(port, () => {
   console.log(`Server in ascolto su http://localhost:${port}`);
 });
