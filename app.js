@@ -1,21 +1,37 @@
-const express = require('express');
-const path = require('path');
-const indexRouter = require('./routes/index');
-
+const express = require("express");
 const app = express();
-const PORT = 3000;
+const port = 3000;
 
-// Serve static files from the "public" directory
-app.use(express.static(path.join(__dirname, 'public')));
+// Middleware per parsing JSON
+app.use(express.json());
 
-// Use the router for handling routes
-app.use('/', indexRouter);
+// Variabile per salvare l'ultimo comando ricevuto
+let lastCommand = null;
 
-// Catch-all route for handling 404 errors
-app.use((req, res, next) => {
-    res.status(404).sendFile(path.join(__dirname, 'views', '404.html'));
-  });
+// Endpoint POST per ricevere comandi
+app.post("/execute", (req, res) => {
+  const { command } = req.body;
 
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}/`);
+  if (!command) {
+    return res.status(400).send({ error: "Comando mancante!" });
+  }
+
+  lastCommand = command; // Salva il comando
+  console.log(`Comando ricevuto: ${command}`);
+  res.status(200).send({ message: "Comando ricevuto con successo!" });
+});
+
+// Endpoint GET per restituire l'ultimo comando
+app.get("/", (req, res) => {
+  if (lastCommand) {
+    res.status(200).send({ command: lastCommand });
+    lastCommand = null; // Resetta il comando dopo averlo inviato
+  } else {
+    res.status(200).send({ command: null });
+  }
+});
+
+// Avvia il server
+app.listen(port, () => {
+  console.log(`Server in ascolto su http://localhost:${port}`);
 });
