@@ -3,6 +3,8 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 
 const app = express();
+
+// Usa la porta assegnata da Railway (o 3000 di fallback)
 const port = process.env.PORT || 3000;
 
 // Abilita CORS per permettere richieste da origini diverse
