@@ -18,10 +18,14 @@ app.post("/execute", (req, res) => {
 
   lastCommand = command; // Salva il comando
   console.log(`Comando ricevuto: ${command}`);
+
+  // Qui puoi aggiungere la logica per inviare il comando al gioco Roblox
+  // Potresti voler usare un WebSocket o un altro meccanismo per comunicare con il gioco
+
   res.status(200).send({ message: "Comando ricevuto con successo!" });
 });
 
-// Endpoint GET per restituire l'ultimo comando
+// Endpoint GET per restituire l'ultimo comando (per Roblox)
 app.get("/", (req, res) => {
   if (lastCommand) {
     res.status(200).send({ command: lastCommand });
