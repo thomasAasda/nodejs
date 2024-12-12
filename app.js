@@ -11,17 +11,20 @@ app.use(cors());
 // Middleware per parsare il corpo delle richieste JSON
 app.use(bodyParser.json());
 
+// Verifica che la root sia attiva
+app.get('/', (req, res) => {
+    res.send('Server attivo');
+});
+
 // Gestione della richiesta POST per eseguire il comando
 app.post('/execute', (req, res) => {
-    const { command } = req.body; // Si aspetta il comando nel corpo della richiesta
+    const { command } = req.body;
 
     if (command) {
-        // Qui puoi aggiungere il codice per gestire i comandi
+        // Simula l'esecuzione del comando (puoi aggiungere logica qui)
         console.log(`Comando ricevuto: ${command}`);
-        // Restituisce una risposta JSON con il comando ricevuto
         res.json({ success: true, command: command });
     } else {
-        // Se non è stato inviato alcun comando, restituiamo un errore 400
         res.status(400).json({ success: false, error: 'Comando non fornito' });
     }
 });
