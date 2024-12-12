@@ -1,33 +1,39 @@
-const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-
+const express = require("express");
+const cors = require("cors"); // Aggiunto CORS
 const app = express();
+const port = 3000;
 
-// Usa la porta dinamica che Railway fornisce tramite la variabile di ambiente PORT
-const port = process.env.PORT || 3000;
+// Middleware per parsing JSON
+app.use(express.json());
+app.use(cors()); // Abilitazione di CORS
 
-// Log per verificare quale porta è stata assegnata
-console.log('Porta in ascolto:', port);
+// Variabile per salvare l'ultimo comando ricevuto
+let lastCommand = null;
 
-app.use(cors());
-app.use(bodyParser.json());
+// Endpoint POST per ricevere comandi
+app.post("/execute", (req, res) => {
+  const { command } = req.body;
 
-app.get('/', (req, res) => {
-    res.send('Server attivo');
+  if (!command) {
+    return res.status(400).send({ error: "Comando mancante!" });
+  }
+
+  lastCommand = command; // Salva il comando
+  console.log(`Comando ricevuto: ${command}`);
+  res.status(200).send({ message: "Comando ricevuto con successo!" });
 });
 
-app.post('/execute', (req, res) => {
-    const { command } = req.body;
-
-    if (command) {
-        console.log(`Comando ricevuto: ${command}`);
-        res.json({ success: true, command: command });
-    } else {
-        res.status(400).json({ success: false, error: 'Comando non fornito' });
-    }
+// Endpoint GET per restituire l'ultimo comando
+app.get("/", (req, res) => {
+  if (lastCommand) {
+    res.status(200).send({ command: lastCommand });
+    lastCommand = null; // Resetta il comando dopo averlo inviato
+  } else {
+    res.status(200).send({ command: null });
+  }
 });
 
+// Avvia il server
 app.listen(port, () => {
-    console.log(`Server in ascolto sulla porta ${port}`);
+  console.log(`Server in ascolto su http://localhost:${port}`);
 });
