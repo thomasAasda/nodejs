@@ -1,33 +1,20 @@
 const express = require('express');
-const cors = require('cors');
+const cors = require('cors');  // Importa cors
 const app = express();
-const port = process.env.PORT || 8080;
 
-let scripts = {};
+// Abilita CORS per tutte le origini (puoi specificare domini se necessario)
+app.use(cors());  // Questo permette tutte le richieste da qualsiasi origine
 
-app.use(cors());  // Abilita CORS
-app.use(express.json());
+// Oppure puoi restringere l'accesso a specifici domini:
+app.use(cors({
+  origin: 'https://1096738819-atari-embeds.googleusercontent.com'  // Imposta il dominio corretto
+}));
 
-// Gestisce la richiesta GET per ottenere uno script Lua
-app.get('/key/:id', (req, res) => {
-    const gameId = req.params.id;
-    const script = scripts[gameId] || '';
-    res.send(script);
+app.get('/key/:gameId', (req, res) => {
+  const gameId = req.params.gameId;
+  res.json({ message: `Key for game ${gameId}` });
 });
 
-// Gestisce la richiesta POST per inviare uno script Lua
-app.post('/key/:id', (req, res) => {
-    const gameId = req.params.id;
-    const script = req.body.script;
-
-    if (!gameId || !script) {
-        return res.status(400).send('Game ID or script missing');
-    }
-
-    scripts[gameId] = script;
-    res.send('Successfully Executed');
-});
-
-app.listen(port, () => {
-    console.log(`Server is listening on port ${port}`);
+app.listen(3000, () => {
+  console.log('Server running on port 3000');
 });
