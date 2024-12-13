@@ -1,37 +1,41 @@
 const express = require('express');
-const cors = require('cors');
+const cors = require('cors'); // Importa CORS
+const path = require('path');
 const app = express();
 const port = process.env.PORT || 8080;
 
 let scripts = {};
 
-// Abilita CORS per permettere richieste da altri domini
+// Abilita CORS per tutte le origini
 app.use(cors());
 
-// Usa express.json() per parsare il corpo delle richieste in formato JSON
+// Se vuoi limitare l'accesso solo a determinati domini, puoi farlo così:
+// app.use(cors({
+//     origin: 'https://1480224298-atari-embeds.googleusercontent.com' // Specifica il dominio che deve avere accesso
+// }));
+
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
-// Endpoint per ottenere lo script
 app.get('/key/:id', (req, res) => {
     const gameId = req.params.id;
     const script = scripts[gameId] || '';
     res.send(script);
 });
 
-// Endpoint per impostare lo script
 app.post('/key/:id', (req, res) => {
     const gameId = req.params.id;
     const script = req.body.script;
 
-    if (!gameId || !script) {
-        return res.status(400).send('No Game ID or Script Specified');
+    if (!gameId) {
+        res.status(400).send('No Game ID Specified');
+        return;
     }
 
     scripts[gameId] = script;
     res.send('Successfully Executed');
 });
 
-// Avvia il server
 app.listen(port, () => {
     console.log(`Server is listening on port ${port}`);
 });
