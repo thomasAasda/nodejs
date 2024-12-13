@@ -1,20 +1,20 @@
 const express = require('express');
-const cors = require('cors');
 const app = express();
+const bodyParser = require('body-parser');
+const port = 3000;
 
-// Permetti tutte le origini
-app.use(cors({
-  origin: '*',  // Usa '*' per consentire tutte le origini
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],  // Aggiungi i metodi desiderati
-  allowedHeaders: ['Content-Type', 'Authorization'],  // Aggiungi le intestazioni che desideri autorizzare
-}));
+app.use(bodyParser.json());
 
-// Definisci le tue route
-app.get('/key/:id', (req, res) => {
-  res.json({ key: '123456' });
+app.post('/receiveCommand', (req, res) => {
+    const command = req.body.command;
+    console.log(`Comando ricevuto: ${command}`);
+
+    // Qui puoi inviare il comando al server di Roblox usando HttpService
+    // (usando il codice Roblox mostrato sopra per ricevere il comando)
+
+    res.send({ status: "success" });
 });
 
-// Avvia il server
-app.listen(5091, () => {
-  console.log('Server is running on port 5091');
+app.listen(port, () => {
+    console.log(`Server listening at http://localhost:${port}`);
 });
