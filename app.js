@@ -1,47 +1,32 @@
-const { Client, GatewayIntentBits } = require('discord.js');
-const net = require('net');
+const express = require('express');
+const path = require('path');
+const app = express();
+const port = process.env.PORT || 8080;
 
-// Token del bot Discord
-const DISCORD_TOKEN = 'MTMxNjUyMzg0NDY2MzY0NDIyMg.G8XY2T.8J9lLRtOSgfi1EF9zjWnPGltLhrLB9tlzXYx8U';
-// Indirizzo del server Roblox
-const ROBLOX_SERVER_IP = '127.0.0.1';
-const ROBLOX_SERVER_PORT = 12345;
+let scripts = {};
 
-// Crea il client Discord
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.MessageContent] });
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.json());
 
-// Funzione per inviare comandi al server Roblox tramite socket
-function sendCommandToRoblox(command) {
-    const clientSocket = new net.Socket();
-
-    clientSocket.connect(ROBLOX_SERVER_PORT, ROBLOX_SERVER_IP, () => {
-        console.log('Connesso al server Roblox');
-        clientSocket.write(command);
-    });
-
-    clientSocket.on('error', (err) => {
-        console.error('Errore nella connessione:', err);
-    });
-
-    clientSocket.on('close', () => {
-        console.log('Connessione chiusa');
-    });
-}
-
-// Evento: quando il bot è pronto
-client.once('ready', () => {
-    console.log(Bot connesso come ${client.user.tag});
+app.get('/key/:id', (req, res) => {
+    const gameId = req.params.id;
+    const script = scripts[gameId] || '';
+    res.send(script);
 });
 
-// Evento: quando viene ricevuto un messaggio
-client.on('messageCreate', (message) => {
-    if (message.author.bot) return; // Ignora i messaggi dei bot
-    if (message.content.startsWith('!roblox ')) {
-        const command = message.content.slice(8).trim();
-        sendCommandToRoblox(command);
-        message.reply(Comando inviato: \${command}\``);
+app.post('/key/:id', (req, res) => {
+    const gameId = req.params.id;
+    const script = req.body.script;
+
+    if (!gameId) {
+        res.status(400).send('No Game ID Specified');
+        return;
     }
+
+    scripts[gameId] = script;
+    res.send('Succesfully Executed');
 });
 
-// Avvia il bot
-client.login(DISCORD_TOKEN);
+app.listen(port, () => {
+    console.log(`Server is listening on port ${port}`);
+});
