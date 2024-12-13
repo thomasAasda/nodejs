@@ -1,20 +1,20 @@
 const express = require('express');
-const cors = require('cors');  // Importa cors
+const cors = require('cors');
 const app = express();
 
-// Abilita CORS per tutte le origini (puoi specificare domini se necessario)
-app.use(cors());  // Questo permette tutte le richieste da qualsiasi origine
-
-// Oppure puoi restringere l'accesso a specifici domini:
+// Permetti tutte le origini
 app.use(cors({
-  origin: 'https://1096738819-atari-embeds.googleusercontent.com'  // Imposta il dominio corretto
+  origin: '*',  // Usa '*' per consentire tutte le origini
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],  // Aggiungi i metodi desiderati
+  allowedHeaders: ['Content-Type', 'Authorization'],  // Aggiungi le intestazioni che desideri autorizzare
 }));
 
-app.get('/key/:gameId', (req, res) => {
-  const gameId = req.params.gameId;
-  res.json({ message: `Key for game ${gameId}` });
+// Definisci le tue route
+app.get('/key/:id', (req, res) => {
+  res.json({ key: '123456' });
 });
 
-app.listen(3000, () => {
-  console.log('Server running on port 3000');
+// Avvia il server
+app.listen(5091, () => {
+  console.log('Server is running on port 5091');
 });
