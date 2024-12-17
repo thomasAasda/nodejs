@@ -1,20 +1,36 @@
 const express = require('express');
-const app = express();
 const bodyParser = require('body-parser');
-const port = 3000;
 
+// Create a new Express app
+const app = express();
+
+// Use the body-parser middleware to parse incoming JSON data
 app.use(bodyParser.json());
 
-app.post('/receiveCommand', (req, res) => {
-    const command = req.body.command;
-    console.log(`Comando ricevuto: ${command}`);
+// Create an endpoint for the executor
+app.post('/execute', (request, response) => {
+  // Get the script from the request body
+  const script = request.body.script;
 
-    // Qui puoi inviare il comando al server di Roblox usando HttpService
-    // (usando il codice Roblox mostrato sopra per ricevere il comando)
+  // Validate the script
+  if (typeof script !== 'string') {
+    return response.status(400).send({ error: 'Invalid script' });
+  }
 
-    res.send({ status: "success" });
+  // Load and execute the script
+  let result;
+  try {
+    result = loadstring(script)();
+  } catch (error) {
+    return response.status(500).send({ error: `Error executing script: ${error.message}` });
+  }
+
+  // Send a response to the client
+  response.send({ result });
 });
 
+// Start the server
+const port = 3000;
 app.listen(port, () => {
-    console.log(`Server listening at http://localhost:${port}`);
+  console.log(`Server listening on port ${port}`);
 });
