@@ -1,8 +1,14 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 
 // Create a new Express app
 const app = express();
+
+// Use the cors middleware to allow CORS requests
+app.use(cors({
+  origin: 'https://884699221-atari-embeds.googleusercontent.com'
+}));
 
 // Use the body-parser middleware to parse incoming JSON data
 app.use(bodyParser.json());
